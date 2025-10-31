@@ -3,6 +3,8 @@ package com.turkcell.order_service.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.Message;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -18,11 +20,12 @@ public class OrdersController {
   @PostMapping()
   public String createOrder(@RequestBody CreateOrderDto dto) {
     OrderCreatedEvent event = new OrderCreatedEvent(dto.productId());
-    streamBridge.send("orderCreated-out-0", event);
+    Message<OrderCreatedEvent> message = MessageBuilder.withPayload(event).build();
+    streamBridge.send("orderCreated-out-0", message);
     return dto.productId();
   }
 
-  record OrderCreatedEvent(String productId) {
+  record OrderCreatedEvent(String productId) {  
   };
 
   record CreateOrderDto(String productId) {
